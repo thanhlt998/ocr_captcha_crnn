@@ -1,0 +1,7 @@
+data/images
+data/test_images
+data/kaggle_data
+models
+*.pkl
+.ipynb_checkpoints
+.idea
