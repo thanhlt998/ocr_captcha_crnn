@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
-from captcha.image import ImageCaptcha
+# from captcha.image import ImageCaptcha
+from captcha_generator.image import ImageCaptcha
 import string
 import numpy as np
 import threading
@@ -12,18 +13,20 @@ font_case_sensitive_paths = [os.path.join(font_case_sensitive_dir, fn) for fn in
 font_non_case_sensitive_paths = [os.path.join(font_non_case_sensitive_dir, fn) for fn in
                                  os.listdir(font_non_case_sensitive_dir)]
 
-all_case_sensitive_chars = np.array(list(string.ascii_letters + string.digits))
+all_case_sensitive_chars = np.array(list(string.ascii_lowercase + string.digits))
 all_non_case_sensitive_chars = np.array(list(string.ascii_uppercase + string.digits))
 
 
 def gen_captcha(fonts: tuple, chars: tuple, n_captcha, output_dir, min_n_chars=5, max_n_chars=15):
     n = max_n_chars - min_n_chars + 1
-    n_captcha_per_n = (n_captcha - 1) // (n * len(fonts)) + 1
+    n_captcha_per_n = (n_captcha - 1) // (n * len([f for f in fonts if len(f) != 0])) + 1
 
     for f, c in zip(fonts, chars):
+        if len(f) == 0: continue
         n_chars = c.shape[0]
         for n_char in range(min_n_chars, max_n_chars + 1):
-            img_captcha_gen = ImageCaptcha(width=n_char * 50, height=50, fonts=f, font_sizes=[50])
+            # img_captcha_gen = ImageCaptcha(width=n_char * 50, height=50, fonts=f, font_sizes=[50])
+            img_captcha_gen = ImageCaptcha(height=40, pad_height=10, pad_width=20, fonts=f)
 
             i = 0
             while i < n_captcha_per_n:
@@ -71,5 +74,5 @@ def test_data():
 
 if __name__ == '__main__':
     # test_data()
-    gen_data(output_dir=Path('data/images'), n_captcha=5000)
-    # gen_data(output_dir=Path('data/test_images'), n_captcha=1000)
+    gen_data(output_dir=Path('data/images'), n_captcha=50000)
+    gen_data(output_dir=Path('data/test_images'), n_captcha=10000)

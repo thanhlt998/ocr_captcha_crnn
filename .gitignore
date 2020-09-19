@@ -3,5 +3,7 @@ data/test_images
 data/kaggle_data
 models
 *.pkl
+*.zip
+**/*.pyc
 .ipynb_checkpoints
 .idea
