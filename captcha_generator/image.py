@@ -13,6 +13,7 @@ from PIL import Image
 from PIL import ImageFilter
 from PIL.ImageDraw import Draw
 from PIL.ImageFont import truetype
+
 try:
     from cStringIO import StringIO as BytesIO
 except ImportError:
@@ -30,10 +31,9 @@ if wheezy_captcha:
 else:
     __all__ = ['ImageCaptcha']
 
-
-table  =  []
-for  i  in  range( 256 ):
-    table.append( i * 1.97 )
+table = []
+for i in range(256):
+    table.append(i * 1.97)
 
 
 class _Captcha(object):
@@ -62,6 +62,7 @@ class _Captcha(object):
 
 class WheezyCaptcha(_Captcha):
     """Create an image CAPTCHA with wheezy.captcha."""
+
     def __init__(self, width=200, height=75, fonts=None):
         self._width = width
         self._height = height
@@ -107,6 +108,7 @@ class ImageCaptcha(_Captcha):
     :param fonts: Fonts to be used to generate CAPTCHA images.
     :param font_sizes: Random choose a font size from this parameters.
     """
+
     def __init__(self, width=160, height=60, pad_width=30, pad_height=10, fonts=None, font_sizes=None):
         self._width = width + 2 * pad_width
         self._height = height + 2 * pad_height
@@ -208,16 +210,17 @@ class ImageCaptcha(_Captcha):
         image = image.resize((width, self._height))
 
         average = int(text_width / len(chars))
-        rand = int(0.1 * average) # origin = 0.25
+        rand = int(random.randint(20, 31) / 100.0 * average)  # origin = 0.25
         # offset = int(average * 0.1) # origin = 0.1
         offset = self._pad_width
         h_rand = int(0.1 * self._height)
+        use_rand_offset = bool(random.getrandbits(1))
 
         for im in images:
             w, h = im.size
             mask = im.convert('L').point(table)
             image.paste(im, (offset, int((self._height - h) / 2) + random.randint(-h_rand, h_rand)), mask)
-            offset = offset + w + random.randint(-rand, 0)
+            offset = offset + w + (random.randint(-rand, 0) if use_rand_offset else -rand)
 
         if width > self._width:
             image = image.resize((self._width, self._height))
@@ -234,7 +237,7 @@ class ImageCaptcha(_Captcha):
             b_low, b_up = 238, 255
             c_low, c_up = 10, 200
         else:
-            b_low, b_up = 5, 100
+            b_low, b_up = -1, 100
             c_low, c_up = 200, 255
         background = random_color(b_low, b_up)
         color = random_color(c_low, c_up, random.randint(220, 255))
@@ -247,8 +250,11 @@ class ImageCaptcha(_Captcha):
 
 def random_color(start, end, opacity=None):
     red = random.randint(start, end)
-    green = random.randint(start, end)
-    blue = random.randint(start, end)
+    if red == -1:
+        green, blue = -1, -1
+    else:
+        green = random.randint(start, end)
+        blue = random.randint(start, end)
     if opacity is None:
-        return (red, green, blue)
-    return (red, green, blue, opacity)
+        return red, green, blue
+    return red, green, blue, opacity

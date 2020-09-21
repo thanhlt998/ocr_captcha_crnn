@@ -7,3 +7,7 @@ models
 **/*.pyc
 .ipynb_checkpoints
 .idea
+exp
+model_serving/logs
+model_serving/model_store
+colab_captcha_crnn.ipynb

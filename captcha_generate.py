@@ -15,6 +15,7 @@ font_non_case_sensitive_paths = [os.path.join(font_non_case_sensitive_dir, fn) f
 
 all_case_sensitive_chars = np.array(list(string.ascii_lowercase + string.digits))
 all_non_case_sensitive_chars = np.array(list(string.ascii_uppercase + string.digits))
+only_digits_chars = np.array(list(string.digits))
 
 
 def gen_captcha(fonts: tuple, chars: tuple, n_captcha, output_dir, min_n_chars=5, max_n_chars=15):
@@ -26,7 +27,7 @@ def gen_captcha(fonts: tuple, chars: tuple, n_captcha, output_dir, min_n_chars=5
         n_chars = c.shape[0]
         for n_char in range(min_n_chars, max_n_chars + 1):
             # img_captcha_gen = ImageCaptcha(width=n_char * 50, height=50, fonts=f, font_sizes=[50])
-            img_captcha_gen = ImageCaptcha(height=40, pad_height=10, pad_width=20, fonts=f)
+            img_captcha_gen = ImageCaptcha(height=40, pad_height=16, pad_width=20, fonts=f)
 
             i = 0
             while i < n_captcha_per_n:
@@ -45,16 +46,16 @@ def test_font(font: str):
 
 def gen_data(output_dir, n_captcha):
     logging.basicConfig(format="%(asctime)s: %(message)s", level=logging.INFO, datefmt="%Y-%m-%d %H:%M:%S")
-    n_threads = 10
+    n_threads = 25
     n_captcha_per_thread = (n_captcha - 1) // n_threads + 1
 
     logging.info(f'Creating {n_threads} threads')
     threads = [threading.Thread(target=gen_captcha, kwargs={
-        'fonts': (font_case_sensitive_paths, font_non_case_sensitive_paths),
-        'chars': (all_case_sensitive_chars, all_non_case_sensitive_chars),
+        'fonts': (font_case_sensitive_paths, font_non_case_sensitive_paths, font_case_sensitive_paths),
+        'chars': (all_case_sensitive_chars, all_non_case_sensitive_chars, only_digits_chars),
         'n_captcha': n_captcha_per_thread,
         'min_n_chars': 5,
-        'max_n_chars': 5,
+        'max_n_chars': 8,
         'output_dir': output_dir,
     }) for _ in range(n_threads)]
 
@@ -74,5 +75,5 @@ def test_data():
 
 if __name__ == '__main__':
     # test_data()
-    gen_data(output_dir=Path('data/images'), n_captcha=50000)
-    gen_data(output_dir=Path('data/test_images'), n_captcha=10000)
+    gen_data(output_dir=Path('data/images'), n_captcha=5000)
+    gen_data(output_dir=Path('data/test_images'), n_captcha=1000)
